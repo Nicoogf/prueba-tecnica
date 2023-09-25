@@ -6,6 +6,11 @@ import { UserList } from './Components/UserList';
 function App() {
   
   const [ users , setUsers ] = useState([]) ;
+  const [ showColors , setShowColors] = useState( false );
+
+  const toggleColors = () =>{
+    setShowColors( !showColors )
+  }
 
 
 useEffect( ()=>{
@@ -19,9 +24,18 @@ useEffect( ()=>{
 
   return (
     <div className='App'>
+
       <h1>Prueba Tecnica.</h1>
 
-     <UserList users={ users } />
+      <header>
+        <button onClick={ toggleColors }> Colorear Filas </button>
+      </header>
+
+      <main>
+       <UserList users={ users }  showColors = { showColors }/>
+      </main>
+
+    
     </div>
   )
 }
