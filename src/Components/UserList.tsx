@@ -20,6 +20,7 @@ export function UserList ({ eliminarUsuario , users , showColors }: Props) {
 
 
             <tbody>
+                 
                 {
                     users.map( (user , index )=>{
                     const backgroundColor =  index  % 2 === 0 ?  "#333" : "#555 "
@@ -36,7 +37,7 @@ export function UserList ({ eliminarUsuario , users , showColors }: Props) {
                             <td> <button onClick={ () => eliminarUsuario(user.email)}> Eliminar </button> </td>
                         </tr>
                         )
-                    } )
+                    })
                 }
             </tbody>
         </table>
