@@ -1,4 +1,4 @@
-import { useEffect , useRef, useState } from 'react';
+import { useEffect , useMemo, useRef, useState } from 'react';
 import './App.css' ;
 import { type User } from "./types.d" ; 
 import { UserList } from './Components/UserList';
@@ -20,6 +20,15 @@ function App() {
       setSortByCountry( prevState => !prevState)
     } 
 
+    const eliminarUsuario = ( email: string ) =>{
+      const usuariosFiltrados = users.filter(( usuario )=> usuario.email !==  email)
+      setUsers(usuariosFiltrados)
+    }
+
+    const handleReset = () =>{
+      setUsers( EstadoOriginal.current )
+    }
+
     useEffect( ()=>{
       fetch( "https://randomuser.me/api?results=100" )
       .then( res => res.json() )
@@ -30,26 +39,28 @@ function App() {
       .catch( err => console.log(err))
       }, [])
 
-      const filteredUsers = typeof filterCountry === 'string'  && filterCountry.length > 0
-      ? users.filter(( user)=>{
-        return user.location.country.toLocaleLowerCase().includes(filterCountry.toLocaleLowerCase())
-      }): users
 
-      const sortedUsers = sortByCountry ? users.toSorted( ( a, b )=>{
-        return a.location.country.localeCompare(b.location.country)
-      })
-      :filteredUsers
+   
+      const filteredUsers = useMemo( () => {
+        console.log ( "Calculando FilteredUsers")
+        return filterCountry != null && filterCountry.length > 0
+          ? users.filter ( user => {
+            return user.location.country.toLocaleLowerCase().includes(filterCountry.toLocaleLowerCase())
+          })
+          : users
+     } ,[ users , filterCountry])
 
-      const eliminarUsuario = ( email: string ) =>{
-        const usuariosFiltrados = users.filter(( usuario )=> usuario.email !==  email)
-        setUsers(usuariosFiltrados)
-      }
+     
 
-      const handleReset = () =>{
-        setUsers( EstadoOriginal.current )
-      }
+     const sortedUsers = useMemo( () =>{
+        console.log( 'calculando sortedUsers')
 
-      
+        return sortByCountry
+        ? filteredUsers.toSorted(
+          (a , b) => a.location.country.localeCompare(b.location.country)
+        )
+        :filteredUsers
+      } , [filteredUsers , sortByCountry])
 
 
 
