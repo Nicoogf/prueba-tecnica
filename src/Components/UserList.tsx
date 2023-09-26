@@ -1,20 +1,21 @@
-import { type User } from "../types.d" ; 
+import { SortBy, type User } from "../types.d" ; 
 
 interface Props{
     users: User[]
     showColors: boolean
     eliminarUsuario : ( email:string) => void
+    changeSorting : ( sort:SortBy) => void 
 }
 
 
-export function UserList ({ eliminarUsuario , users , showColors }: Props) {
+export function UserList ({ changeSorting , eliminarUsuario , users , showColors }: Props) {
     return(
         <table width='100%'>
             <thead>
                 <th>Foto</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Pais</th>
+                <th className='pointer' onClick={()=> changeSorting(SortBy.NAME)}>Nombre</th>
+                <th className='pointer' onClick={()=> changeSorting(SortBy.LAST)}>Apellido</th>
+                <th className='pointer' onClick={()=> changeSorting(SortBy.COUNTRY)}>Pais</th>
                 <th>Accion</th>
             </thead>
 

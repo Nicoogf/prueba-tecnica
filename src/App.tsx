@@ -1,13 +1,13 @@
 import { useEffect , useMemo, useRef, useState } from 'react';
 import './App.css' ;
-import { type User } from "./types.d" ; 
+import { SortBy, type User } from "./types.d" ; 
 import { UserList } from './Components/UserList';
 
 function App() {
   
   const [ users , setUsers ] = useState<User[]>([]) ;
   const [ showColors , setShowColors] = useState( false );
-  const [ sortByCountry , setSortByCountry ] = useState( false ) ;
+  const [ sorting , setSorting ] = useState<SortBy>( SortBy.NONE ) ;
   const [ filterCountry , setFilterCountry ] = useState<string|null> ( null )
  
   const EstadoOriginal = useRef<User[]>([]) ;
@@ -17,7 +17,8 @@ function App() {
     }
 
     const toggleSortByCountry = () =>{
-      setSortByCountry( prevState => !prevState)
+      const newSortingValue = sorting === SortBy.NONE ? SortBy.COUNTRY : SortBy.NONE
+      setSorting( newSortingValue )
     } 
 
     const eliminarUsuario = ( email: string ) =>{
@@ -28,6 +29,10 @@ function App() {
     const handleReset = () =>{
       setUsers( EstadoOriginal.current )
     }
+
+    const handleChangeSort = (sort:SortBy) =>{
+      setSorting(sort)
+    } 
 
     useEffect( ()=>{
       fetch( "https://randomuser.me/api?results=100" )
@@ -52,16 +57,22 @@ function App() {
 
      
 
-     const sortedUsers = useMemo( () =>{
-        console.log( 'calculando sortedUsers')
-
-        return sortByCountry
-        ? filteredUsers.toSorted(
-          (a , b) => a.location.country.localeCompare(b.location.country)
-        )
-        :filteredUsers
-      } , [filteredUsers , sortByCountry])
-
+     const sortedUsers = useMemo(() => {
+      console.log('calculate sortedUsers')
+  
+      if (sorting === SortBy.NONE) return filteredUsers
+  
+      const compareProperties: Record<string, (user: User) => any> = {
+        [SortBy.COUNTRY]: user => user.location.country,
+        [SortBy.NAME]: user => user.name.first,
+        [SortBy.LAST]: user => user.name.last
+      }
+  
+      return filteredUsers.toSorted((a, b) => {
+        const extractProperty = compareProperties[sorting]
+        return extractProperty(a).localeCompare(extractProperty(b))
+      })
+    }, [filteredUsers, sorting])
 
 
   return (
@@ -73,7 +84,7 @@ function App() {
         <button onClick={ toggleColors }> Colorear Filas </button>
 
         <button onClick={ toggleSortByCountry }> 
-          { sortByCountry ? "Ordenar Paises" : "No ordenar Paises"}  
+          { sorting === SortBy.COUNTRY ? "No ordenar Paises" : "Ordenar Paises"}  
         </button>
 
         <button onClick={ handleReset}>
@@ -84,7 +95,7 @@ function App() {
       </header>
 
       <main>
-       <UserList users={ sortedUsers }  showColors = { showColors }  eliminarUsuario = {eliminarUsuario}/>
+       <UserList changeSorting = { handleChangeSort } users={ sortedUsers }  showColors = { showColors }  eliminarUsuario = {eliminarUsuario}/>
       </main>
 
     
