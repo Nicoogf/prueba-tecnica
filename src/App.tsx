@@ -12,6 +12,8 @@ function App() {
 
   const [isLoading , setIsLoading ] = useState( false );
   const [ error , setError ] = useState ( false );
+
+  const [ currentPage , setCurrentPage ] = useState( 1 )
  
   const EstadoOriginal = useRef<User[]>([]) ;
 
@@ -41,13 +43,13 @@ function App() {
       setIsLoading(true);
       setError(false);
 
-      fetch("https://randomuser.me/api?results=10")
+      fetch(`https://randomuser.me/api?results=10&seed=practica&page=${ currentPage}`)
         .then((res) => {
           if(!res.ok) throw new Error ("Error en la peticion")
           return res.json()
         })      
         .then((res) => {
-          setUsers(res.results);
+          setUsers( prevUsers => prevUsers.concat(res.results));
           EstadoOriginal.current = res.results;
         })
         .catch((err) => {
@@ -57,7 +59,7 @@ function App() {
         .finally(() => {
           setIsLoading(false);
         });
-    }, []);
+    }, [currentPage]);
 
 
    
@@ -110,13 +112,18 @@ function App() {
       </header>
 
       <main>
-        { isLoading && <p> Cargando Datos ...</p>} 
 
-        { !isLoading && error && <p> Ocurrio un Problema intente mas tarde </p>}
+      { users.length > 0 &&    <UserList changeSorting = { handleChangeSort } users={ sortedUsers }  showColors = { showColors }  eliminarUsuario = {eliminarUsuario}/> }
 
-        { !isLoading && !error && users.length === 0 && <p>No hay Usuarios para mostrar </p>}
+      { isLoading && <p> Cargando Datos ...</p>} 
 
-        { !isLoading && !error && users.length > 0 &&    <UserList changeSorting = { handleChangeSort } users={ sortedUsers }  showColors = { showColors }  eliminarUsuario = {eliminarUsuario}/> }
+      { !isLoading && error && <p> Ocurrio un Problema intente mas tarde </p>}
+
+      { !isLoading && !error && users.length === 0 && <p>No hay Usuarios para mostrar </p>}
+
+        
+
+      { !isLoading && !error && <button onClick={ () => setCurrentPage (currentPage+1) }> Cargar mas Usuarios </button> }
      
       </main>
 
