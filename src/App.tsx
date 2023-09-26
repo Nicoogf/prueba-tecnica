@@ -1,4 +1,4 @@
-import { useEffect , useState } from 'react';
+import { useEffect , useRef, useState } from 'react';
 import './App.css' ;
 import { type User } from "./types.d" ; 
 import { UserList } from './Components/UserList';
@@ -8,6 +8,9 @@ function App() {
   const [ users , setUsers ] = useState<User[]>([]) ;
   const [ showColors , setShowColors] = useState( false );
   const [ sortByCountry , setSortByCountry ] = useState( false ) ;
+  const [ filterCountry , setFilterCountry ] = useState<string|null> ( null )
+ 
+  const EstadoOriginal = useRef<User[]>([]) ;
 
     const toggleColors = () =>{
       setShowColors( !showColors )
@@ -22,22 +25,31 @@ function App() {
       .then( res => res.json() )
       .then( res => {
         setUsers( res.results )
+        EstadoOriginal.current =  res.results
       })
       .catch( err => console.log(err))
       }, [])
 
-      const sortedUsers = sortByCountry 
-      ? users.toSorted( ( a, b )=>{
+      const filteredUsers = typeof filterCountry === 'string'  && filterCountry.length > 0
+      ? users.filter(( user)=>{
+        return user.location.country.toLocaleLowerCase().includes(filterCountry.toLocaleLowerCase())
+      }): users
+
+      const sortedUsers = sortByCountry ? users.toSorted( ( a, b )=>{
         return a.location.country.localeCompare(b.location.country)
       })
-      :users
+      :filteredUsers
 
       const eliminarUsuario = ( email: string ) =>{
         const usuariosFiltrados = users.filter(( usuario )=> usuario.email !==  email)
         setUsers(usuariosFiltrados)
       }
 
- 
+      const handleReset = () =>{
+        setUsers( EstadoOriginal.current )
+      }
+
+      
 
 
 
@@ -52,6 +64,12 @@ function App() {
         <button onClick={ toggleSortByCountry }> 
           { sortByCountry ? "Ordenar Paises" : "No ordenar Paises"}  
         </button>
+
+        <button onClick={ handleReset}>
+          Resetear estado
+        </button>
+
+        <input placeholder='Filtrar por pais' onChange={(e)=>setFilterCountry(e.target.value)}></input>
       </header>
 
       <main>
