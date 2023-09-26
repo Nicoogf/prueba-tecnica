@@ -9,6 +9,9 @@ function App() {
   const [ showColors , setShowColors] = useState( false );
   const [ sorting , setSorting ] = useState<SortBy>( SortBy.NONE ) ;
   const [ filterCountry , setFilterCountry ] = useState<string|null> ( null )
+
+  const [isLoading , setIsLoading ] = useState( false );
+  const [ error , setError ] = useState ( false );
  
   const EstadoOriginal = useRef<User[]>([]) ;
 
@@ -34,15 +37,27 @@ function App() {
       setSorting(sort)
     } 
 
-    useEffect( ()=>{
-      fetch( "https://randomuser.me/api?results=100" )
-      .then( res => res.json() )
-      .then( res => {
-        setUsers( res.results )
-        EstadoOriginal.current =  res.results
-      })
-      .catch( err => console.log(err))
-      }, [])
+    useEffect(() => {
+      setIsLoading(true);
+      setError(false);
+
+      fetch("https://randomuser.me/api?results=10")
+        .then((res) => {
+          if(!res.ok) throw new Error ("Error en la peticion")
+          return res.json()
+        })      
+        .then((res) => {
+          setUsers(res.results);
+          EstadoOriginal.current = res.results;
+        })
+        .catch((err) => {
+          setError(err); 
+          console.log(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }, []);
 
 
    
@@ -95,7 +110,14 @@ function App() {
       </header>
 
       <main>
-       <UserList changeSorting = { handleChangeSort } users={ sortedUsers }  showColors = { showColors }  eliminarUsuario = {eliminarUsuario}/>
+        { isLoading && <p> Cargando Datos ...</p>} 
+
+        { !isLoading && error && <p> Ocurrio un Problema intente mas tarde </p>}
+
+        { !isLoading && !error && users.length === 0 && <p>No hay Usuarios para mostrar </p>}
+
+        { !isLoading && !error && users.length > 0 &&    <UserList changeSorting = { handleChangeSort } users={ sortedUsers }  showColors = { showColors }  eliminarUsuario = {eliminarUsuario}/> }
+     
       </main>
 
     
