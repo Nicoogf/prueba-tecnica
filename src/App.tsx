@@ -6,6 +6,7 @@ import { UserList } from "./Components/UserList";
 
 function App() {
 
+
 /**
  * Estado de usuarios : 
  *  users = usuarios
@@ -14,11 +15,42 @@ function App() {
  */
   const [ usuarios , setUsuarios ] = useState<Array<User>>([])
 
+
+
+
 /**
+ *  Estado de Colores:
  *  showColors    ---  Colores
  *  setShowColors ---  SetColores 
 */
   const [ colores , setColores ] = useState( false )
+
+
+
+  /**
+   *  Estado de Paises:
+   *  sortByCountry  --- ordenarPaises
+   *  setByCountry   --- SetOrdenarPaises
+   */
+
+  const [ ordenarPaises , SetOrdenarPaises ] = useState( false )
+
+ 
+
+
+  
+/**
+ * La siguiente Variable es la que va a guardar el array de usuarios
+ * ordenados alfabeticamente
+ * sortedUsers ---- UsuariosOrdenados
+ */
+
+    const UsuariosOrdenados = ordenarPaises
+    ?  usuarios.toSorted( ( a , b) => {
+      return a.location.country.localeCompare( b.location.country)
+    })
+    :usuarios
+
 
 
   /**
@@ -49,17 +81,43 @@ function App() {
 
 
 
+  /* toggleOrdenarPaises es la funcion que se encarga de ordenar los paises
+  *
+  */
+
+  const toggleOrdenarPaises = () =>{
+    SetOrdenarPaises (estadoPrevio => !estadoPrevio)
+  }
+
+  /**
+   * Eliminacion de usuarios por Botton
+   *  handleDelete --- EliminarUsuarios
+   *  filteredUsers --- filtrarUsuarios
+   */
+
+  const eliminarUsuarios = ( email:string ) =>{
+    const usuariosFiltrados = usuarios.filter(( user ) => user.email !== email )
+        setUsuarios( usuariosFiltrados )
+    }
+  
+
+
+
+
+
   return(
     <div>
 
       <h1>Listado de Usuarios</h1>
       <header>
         <button onClick={ ToggleColors }> Cambiar color</button>
+        <button onClick={ toggleOrdenarPaises }> 
+        { ordenarPaises ? 'No ordenar por Paises' : 'Ordenar por Paises'}</button>
       </header>
 
 
       { /*Se pasa por Props a UserList ({ usuarios  , colores } : Props */}
-      <UserList usuarios={ usuarios } colores={ colores }/>
+      <UserList usuarios={ UsuariosOrdenados } colores={ colores } eliminarUsuario= { eliminarUsuarios }/>
 
     </div>
   ) ;
