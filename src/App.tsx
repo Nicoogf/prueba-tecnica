@@ -12,9 +12,13 @@ function App() {
  *  setUsers = setUsuarios
  *  El estado inicial va a ser un Array Vacio de tipo User
  */
-  const [ usuario , setusuario ] = useState<Array<User[]>>([])
+  const [ usuarios , setUsuarios ] = useState<Array<User>>([])
 
-
+/**
+ *  showColors    ---  Colores
+ *  setShowColors ---  SetColores 
+*/
+  const [ colores , setColores ] = useState( false )
 
 
   /**
@@ -29,7 +33,7 @@ function App() {
    fetch( 'https://randomuser.me/api/?page=3&results=100' )
     .then( respuesta => respuesta.json())
     .then( respuesta => {
-      setusuario( respuesta.results )
+      setUsuarios( respuesta.results )
     })
     .catch( err => {
       console.error( err )
@@ -38,14 +42,24 @@ function App() {
   } , [] )
 
 
+  /* ToggleColors es la funcion del boton para cambiar colores */
+  const  ToggleColors = () =>{
+    setColores(!colores)
+  }
+
 
 
   return(
     <div>
 
       <h1>Listado de Usuarios</h1>
+      <header>
+        <button onClick={ ToggleColors }> Cambiar color</button>
+      </header>
 
-       <UserList />
+
+      { /*Se pasa por Props a UserList ({ usuarios  , colores } : Props */}
+      <UserList usuarios={ usuarios } colores={ colores }/>
 
     </div>
   ) ;
